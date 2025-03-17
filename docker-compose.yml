@@ -1,0 +1,77 @@
+volumes:
+  pg_data:
+
+
+networks:
+  network:
+    driver: bridge
+    external: false
+
+services:
+  fastapi-app:
+    container_name: fastapi
+    build:
+      context: .
+      dockerfile: alpine.Dockerfile
+    command: gunicorn -k uvicorn.workers.UvicornWorker source.api.main:app --bind 0.0.0.0:8000 --workers 4 --access-logfile '-'
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - example_app.env
+      - example_postgres.env
+    environment:
+      DEBUG: ${DEBUG:-0}
+    networks:
+      - network
+    depends_on:
+      - db
+
+  db:
+    container_name: postgres
+    image: postgres:17.2-alpine
+    env_file: example_postgres.env
+    restart: unless-stopped
+    command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    networks:
+      - network
+  celery: &celery
+    build:
+      context: .
+      dockerfile: alpine.Dockerfile
+    image: celery_worker:latest
+    container_name: celery_worker
+    restart: unless-stopped
+    env_file:
+      - example_app.env
+      - example_postgres.env
+    environment:
+      DEBUG: 1
+    command: >
+      celery -A source.celery_app:celery_app worker -l info -c 10 -Q save_user,get_streamers,celery,save_chat,default,send_dc
+    depends_on:
+      - db
+      - rabbitmq
+    networks:
+      - network
+    volumes:
+      - ./migrations/models:/app/migrations/models
+
+  celery-beat:
+    <<: *celery
+    container_name: celery-beat
+    image: celery_beat
+    command: >
+      celery -A source.celery_app:celery_app beat -l info -s /tmp/celerybeat-schedule
+
+  rabbitmq:
+    image: rabbitmq:3.13-alpine
+    container_name: rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_FEATURE_FLAGS: "quorum_queue"
+    networks:
+      - network

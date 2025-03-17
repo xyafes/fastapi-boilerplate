@@ -1,0 +1,15 @@
+[project]
+name = "fastapi-boilerplate"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aerich[toml]>=0.8.2",
+    "celery>=5.4.0",
+    "fastapi[standard]>=0.115.11",
+    "gunicorn>=23.0.0",
+    "tortoise-orm[asyncpg]>=0.24.2",
+    "uvloop>=0.21.0",
+    "websockets>=15.0.1",
+]
