@@ -1,7 +1,6 @@
 volumes:
   pg_data:
 
-
 networks:
   network:
     driver: bridge
@@ -13,7 +12,13 @@ services:
     build:
       context: .
       dockerfile: alpine.Dockerfile
-    command: gunicorn -k uvicorn.workers.UvicornWorker source.api.main:app --bind 0.0.0.0:8000 --workers 4 --access-logfile '-'
+    command: >
+      gunicorn
+      -k uvicorn.workers.UvicornWorker
+      source.api.main:app
+      --bind 0.0.0.0:8000
+      --workers 4
+      --access-logfile '-'
     restart: unless-stopped
     ports:
       - "8000:8000"
@@ -38,6 +43,7 @@ services:
       - ./postgresql.conf:/etc/postgresql/postgresql.conf:ro
     networks:
       - network
+  
   celery: &celery
     build:
       context: .
@@ -51,7 +57,11 @@ services:
     environment:
       DEBUG: 1
     command: >
-      celery -A source.celery_app:celery_app worker -l info -c 10 -Q save_user,get_streamers,celery,save_chat,default,send_dc
+      celery
+      -A source.celery_app:celery_app worker
+      -l info
+      -c 10
+      -Q save_user,get_streamers,celery,save_chat,default,send_dc
     depends_on:
       - db
       - rabbitmq
@@ -65,7 +75,10 @@ services:
     container_name: celery-beat
     image: celery_beat
     command: >
-      celery -A source.celery_app:celery_app beat -l info -s /tmp/celerybeat-schedule
+      celery
+      -A source.celery_app:celery_app beat
+      -l info
+      -s /tmp/celerybeat-schedule
 
   rabbitmq:
     image: rabbitmq:3.13-alpine
