@@ -35,4 +35,3 @@ RUN chown -R fastapi:fastapi /opt/logs/
 
 USER fastapi
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["aerich", "upgrade"]

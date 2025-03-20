@@ -1,6 +1,4 @@
 import asyncio
-import uvloop
-
 from celery.exceptions import SoftTimeLimitExceeded
 from source import celery_logger as logger, uv_event
 from source.celery_app import celery_app
@@ -12,9 +10,7 @@ asyncio.set_event_loop_policy(uv_event)
 def listen_ws():
     logger.info("Starting the listen_ws task")
     try:
-        # This is where we would put the code to listen to the websocket
-        # and save the data to the database
-        pass
+        ...
     except SoftTimeLimitExceeded:
         logger.info("The listen_ws task was stopped due to a soft time limit")
     finally:
