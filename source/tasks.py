@@ -21,6 +21,7 @@ def listen_ws():
 
 @celery_app.task(queue="default")
 def regular_task():
+    """A regular task that does nothing."""
     logger.info("Starting the regular_task")
 
 

@@ -14,8 +14,10 @@ services:
       context: .
       dockerfile: alpine.Dockerfile
     command: >
+      # fastest way to run uvicorn with gunicorn workers in production fastapi app
       gunicorn -k uvicorn.workers.UvicornWorker source.api.main:app --bind 0.0.0.0:8000 --workers 4 --access-logfile '-'
     restart: unless-stopped
+    # Fix here(ports) when nginx is added
     ports:
       - "8000:8000"
     env_file:
@@ -65,7 +67,7 @@ services:
   celery-beat:
     <<: *celery
     container_name: celery-beat
-    image: celery_beat
+    image: celery_beat:latest
     command: >
       celery -A source.celery_app:celery_app beat -l info -s /tmp/celerybeat-schedule
 
@@ -74,6 +76,8 @@ services:
     container_name: rabbitmq
     restart: unless-stopped
     environment:
+      # quorum queue is better for high availability and performance
+      # https://www.rabbitmq.com/quorum-queues.html
       RABBITMQ_FEATURE_FLAGS: "quorum_queue"
     networks:
       - network
