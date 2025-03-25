@@ -48,6 +48,7 @@ async def get_messages(websocket: ClientConnection) -> None:
 
 async def listen_chat() -> None:
     """Listen to the chat messages of a channel."""
+    timeout = 60 * 29.58  # 29.58 minutes
     async for websocket in connect(
         uri=uri,
         max_queue=32,
@@ -55,7 +56,6 @@ async def listen_chat() -> None:
     ):
         try:
             start_time = datetime.now()
-            timeout = 60 * 29.58
             # Get messages from the websocket, with a timeout of 29.58 minutes
             await asyncio.wait_for(get_messages(websocket), timeout=timeout)
         except asyncio.TimeoutError:
