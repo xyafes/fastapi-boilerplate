@@ -85,11 +85,13 @@ celery = {
     "timezone": "UTC",
     "imports": [
         "source.tasks",
+        "source.app.example_ws",
     ],
     "queues": ["default", "start_ws"],
     "task_routes": {
         "source.tasks.listen_ws": {"queue": "start_ws"},
         "source.tasks.regular_task": {"queue": "default"},
+        "source.app.example_ws.take_message": {"queue": "default"},
     },
     "beat_schedule": {
         "start_get_streamers": {
@@ -99,9 +101,8 @@ celery = {
         "regular_task": {
             "task": "source.tasks.regular_task",
             "schedule": 30.0,  # 30 seconds
-        },  
+        },
     },
-
 }
 
 uv_event = uvloop.EventLoopPolicy()

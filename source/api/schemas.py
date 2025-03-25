@@ -5,7 +5,9 @@ from typing import List
 
 class UserBase(BaseModel):
     user_id: int = Field(..., description="Unique identifier for the user")
-    username: str = Field(..., description="Username of the user", min_length=1, max_length=255)
+    username: str = Field(
+        ..., description="Username of the user", min_length=1, max_length=255
+    )
 
 
 class UserCreate(UserBase):
