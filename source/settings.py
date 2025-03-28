@@ -105,4 +105,7 @@ celery = {
     },
 }
 
+# Websocket timeout
+ws_timeout = 60 * 29.58  # 29.58 minutes
+
 uv_event = uvloop.EventLoopPolicy()
