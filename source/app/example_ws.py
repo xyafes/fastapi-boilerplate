@@ -7,7 +7,7 @@ from websockets.asyncio.client import connect
 
 from source.celery_app import celery_app
 
-from source.settings import uri, uv_event, token
+from source.settings import uri, uv_event, token, ws_timeout
 
 # Set the event loop policy to uvloop
 asyncio.set_event_loop_policy(uv_event)
@@ -48,10 +48,9 @@ async def get_messages(websocket: ClientConnection) -> None:
 
 async def listen_chat() -> None:
     """Listen to the chat messages of a channel."""
-    timeout = 60 * 29.58  # 29.58 minutes
+    timeout = ws_timeout
     async for websocket in connect(
         uri=uri,
-        max_queue=32,
         additional_headers=[("Authorization", token)],
     ):
         try:
@@ -62,6 +61,7 @@ async def listen_chat() -> None:
             logging.info("TimeoutError in listen_chat")
             return None
         except ConnectionClosedError:
+            # When the connection is closed, try to reconnect with timeout
             logging.info("ConnectionClosedError in listen_chat")
             # Calculate the elapsed time
             elapsed_time = datetime.now() - start_time
