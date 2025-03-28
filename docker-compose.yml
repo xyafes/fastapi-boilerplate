@@ -13,8 +13,8 @@ services:
     build:
       context: .
       dockerfile: alpine.Dockerfile
+    # fastest way to run uvicorn with gunicorn workers in production fastapi app
     command: >
-      # fastest way to run uvicorn with gunicorn workers in production fastapi app
       gunicorn -k uvicorn.workers.UvicornWorker source.api.main:app --bind 0.0.0.0:8000 --workers 4 --access-logfile '-'
     restart: unless-stopped
     # Fix here(ports) when nginx is added
@@ -75,9 +75,9 @@ services:
     image: rabbitmq:3.13-alpine
     container_name: rabbitmq
     restart: unless-stopped
+    # quorum queue is better for high availability and performance
+    # https://www.rabbitmq.com/quorum-queues.html
     environment:
-      # quorum queue is better for high availability and performance
-      # https://www.rabbitmq.com/quorum-queues.html
       RABBITMQ_FEATURE_FLAGS: "quorum_queue"
     networks:
       - network
